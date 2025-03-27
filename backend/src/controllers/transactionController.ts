@@ -1,17 +1,28 @@
 import { Request, Response } from 'express';
-import { Transaction } from '../models/Transaction';
+import Transaction from '../models/Transaction';
 
-let transactions: Transaction[] = [];
-
-export const getTransactions = (req: Request, res: Response) => {
-  res.json(transactions);
+export const getTransactions = async (req: Request, res: Response) => {
+  try {
+    const transactions = await Transaction.find({ user: req.user.userId });
+    res.json(transactions);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener transacciones' });
+  }
 };
 
-export const createTransaction = (req: Request, res: Response) => {
-  const newTransaction: Transaction = {
-    id: transactions.length + 1,
-    ...req.body,
-  };
-  transactions.push(newTransaction);
-  res.status(201).json(newTransaction);
+export const createTransaction = async (req: Request, res: Response) => {
+  try {
+    const { description, amount, category, date } = req.body;
+    const transaction = new Transaction({
+      description,
+      amount,
+      category,
+      date: new Date(date),
+      user: req.user.userId,
+    });
+    await transaction.save();
+    res.status(201).json(transaction);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al crear transacción' });
+  }
 };
