@@ -3,7 +3,14 @@ import Transaction from '../models/Transaction';
 
 export const getTransactions = async (req: Request, res: Response) => {
   try {
-    const transactions = await Transaction.find({ user: req.user.userId });
+    const { page = 1, limit = 10, category } = req.query;
+    const query: any = { user: req.user.userId };
+    if (category) query.category = category;
+
+    const transactions = await Transaction.find(query)
+      .limit(Number(limit))
+      .skip((Number(page) - 1) * Number(limit));
+    
     res.json(transactions);
   } catch (error) {
     res.status(500).json({ error: 'Error al obtener transacciones' });
