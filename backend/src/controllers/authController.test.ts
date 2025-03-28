@@ -2,6 +2,17 @@ import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/User';
+import request from 'supertest';
+import app from '../app';
+
+describe('POST /api/auth/register', () => {
+  it('debe registrar un usuario nuevo', async () => {
+    const res = await request(app)
+      .post('/api/auth/register')
+      .send({ username: 'testuser', password: 'password123' });
+    expect(res.statusCode).toEqual(201);
+  });
+});
 
 export const register = async (req: Request, res: Response) => {
   try {
